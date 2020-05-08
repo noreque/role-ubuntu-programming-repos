@@ -1,0 +1,78 @@
+---
+# tasks file for noreque.role-ubuntu-programming-repos
+
+- name: Check if i386 is enabled
+  shell: dpkg --print-foreign-architectures | grep i386
+  register: result_i386_check
+  changed_when: result_i386_check.rc == 1
+  failed_when: result_i386_check.rc > 1
+
+- name: Enable i386 architecture
+  command: dpkg --add-architecture i386
+  when: result_i386_check.rc == 1
+
+- name: Add Ansible repository
+  apt_repository:
+    repo: ppa:ansible/ansible
+    state: present
+
+- name: Add Docker Apt signing key
+  apt_key:
+    id: B50C6A3598EE2C27B34302761B93B277BF674C93
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: Add Git-core repository
+  apt_repository:
+    repo: ppa:git-core/ppa
+    state: present
+
+- name: Add Microsoft signing key
+  apt_key:
+    id: 8994540C1CFC63CED708309E14AD7C334A57793D
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+- name: Add Microsoft repository
+  get_url:
+    url: "https://packages.microsoft.com/config/ubuntu/{{ ansible_distribution_version }}/prod.list"
+    dest: /etc/apt/sources.list.d/microsoft.list
+    mode: "0440"
+
+- name: Add Mono signing key
+  apt_key:
+    id: 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+    keyserver: keyserver.ubuntu.com
+    state: present
+
+- name: Add Mono repository
+  apt_repository:
+    repo: deb https://download.mono-project.com/repo/ubuntu stable main
+    state: present
+
+# TODO: Use snap package?
+- name: Add Ubuntu- repository
+  apt_repository:
+    repo: ppa:lyzardking/ubuntu-make
+    state: present
+
+- name: Add Microsoft signing key
+  apt_key:
+    id: B90F6449FEBC20F00DB13ED8212659B22565CA86
+    url: https://dl.yarnpkg.com/debian/pubkey.gpg
+    state: present
+
+- name: Add Ubuntu- repository
+  apt_repository:
+    repo: deb https://dl.yarnpkg.com/debian/ stable main
+    state: present
+
+- name: Add Zeal repository
+  apt_repository:
+    repo: ppa:zeal-developers/ppa
+    state: present
